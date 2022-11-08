@@ -1,0 +1,1 @@
+matlab -nodesktop -nosplash -r 'addpath /MEG_data/megclinic; megClinicWrapper'

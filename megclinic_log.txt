@@ -1,0 +1,63 @@
+Render menu item: Render Selected Image File
+Start GUI
+Project set: epilepsy
+Clear workflow buttons
+Subject set: Select Subject ...
+Clear workflow buttons
+Subject set: Select Subject ...
+Clear workflow buttons
+Subject set: jones_ronald
+Date set: 150917
+Set workflow variable 38to /MEG_data/epilepsy/jones_ronald/150917/sss/run2_emptyroom_At1500Hz_supine/run2_emptyroom_At1500Hz_supine_raw_sss.fif (setWorkflowVariable())
+Reset Configuration
+Refresh workflow buttons
+Refresh workflow buttons
+File tree and workflow buttons updated
+Tree node selected: run11_defname_upright_fulltrace_raw.fif
+Clear workflow buttons
+Date set: 150917
+Moved file: /MEG_data/epilepsy/jones_ronald/150917/sss/run11_defname_upright/run11_defname_upright_avg.fif
+Set workflow variable 38to /MEG_data/epilepsy/jones_ronald/150917/sss/run2_emptyroom_At1500Hz_supine/run2_emptyroom_At1500Hz_supine_raw_sss.fif (setWorkflowVariable())
+Reset Configuration
+Refresh workflow buttons
+Refresh workflow buttons
+File tree and workflow buttons updated
+Tree node selected: run11_defname_upright_raw.fif
+MaxFilter Configuration Button
+MaxFilter Configuration Button
+Run MaxFilter Button
+MaxFilter command: /neuro/bin/util/maxfilter -gui -f /MEG_data/epilepsy/jones_ronald/150917/run11_defname_upright_raw.fif -o /MEG_data/epilepsy/jones_ronald/150917/sss/run11_defname_upright/run11_defname_upright_raw_tsss.fif -ctc /neuro/databases/ctc/ct_sparse.fif -cal /neuro/databases/sss/sss_cal.dat -autobad off -st 10 -corr 0.9 
+MaxFilter exit value: 0
+EXIT OK: Wrote successfully the result to file /MEG_data/epilepsy/jones_ronald/150917/sss/run11_defname_upright/run11_defname_upright_raw_tsss.fif.
+
+Update Button
+Refresh workflow buttons
+Refresh workflow buttons
+File tree and workflow buttons updated
+Tree node selected: RAW
+Refresh workflow buttons
+File tree and workflow buttons updated
+Refresh workflow buttons
+Refresh workflow buttons
+File tree and workflow buttons updated
+Tree node selected: run1_emptyroom_supine_raw-eve.fif
+Refresh workflow buttons
+Refresh workflow buttons
+File tree and workflow buttons updated
+Tree node selected: run2_emptyroom_At1500Hz_supine_raw_sss.fif
+Refresh workflow buttons
+Refresh workflow buttons
+File tree and workflow buttons updated
+Tree node selected: run1_emptyroom_supine_raw-eve.fif
+Refresh workflow buttons
+Refresh workflow buttons
+File tree and workflow buttons updated
+Tree node selected: run2_emptyroom_At1500Hz_supine_raw_sss.fif
+Refresh workflow buttons
+Refresh workflow buttons
+File tree and workflow buttons updated
+Tree node selected: Run04_spont_eyes_closed_raw_sss.fif
+Refresh workflow buttons
+Refresh workflow buttons
+File tree and workflow buttons updated
+Tree node selected: run11_defname_upright

@@ -1,0 +1,1 @@
+meg_clinic('clean','/MEG_data/oddmeg/pendl_suzanne/110727')
