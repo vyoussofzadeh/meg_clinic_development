@@ -1,1 +1,16 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><DATAINFO><PATH><PROJECTLIST>MEG_Projects.txt</PROJECTLIST><ROOTPATH>/MEG_data</ROOTPATH><MRIPATH>/MEG_data/MRI_database</MRIPATH><BSTPATH>/MEG_data/brainstorm_db</BSTPATH><DEFAULTCONFIGPATH>/MEG_data/megclinic/config</DEFAULTCONFIGPATH><SUBJECTCONFIGPATH>/config</SUBJECTCONFIGPATH><WFFILE>workflow_definition.xml</WFFILE><TASKFILE>task_defaults.xml</TASKFILE><MAXFILE>maxfilter_defaults.xml</MAXFILE><CLINICALLIST>/MEG_data/Notepad/ClinicalCurrentList.xml</CLINICALLIST><RESEARCHLIST>/MEG_data/Notepad/ResearchCurrentList.xml</RESEARCHLIST></PATH></DATAINFO>
+<?xml version="1.0" encoding="utf-8"?>
+<DATAINFO>
+   <PATH>
+      <PROJECTLIST>MEG_Projects.txt</PROJECTLIST>
+      <ROOTPATH>/data/MEG/Clinical</ROOTPATH>
+      <MRIPATH>/data/MEG/Clinical/MRI</MRIPATH>
+      <BSTPATH>/data/MEG/Clinical/brainstorm_db</BSTPATH>
+      <DEFAULTCONFIGPATH>//opt/matlab_toolboxes/megclinic_development/config</DEFAULTCONFIGPATH>
+      <SUBJECTCONFIGPATH>/config</SUBJECTCONFIGPATH>
+      <WFFILE>workflow_definition.xml</WFFILE>
+      <TASKFILE>task_defaults.xml</TASKFILE>
+      <MAXFILE>maxfilter_defaults.xml</MAXFILE>
+      <CLINICALLIST>/MEG_data/Notepad/ClinicalCurrentList.xml</CLINICALLIST>
+      <RESEARCHLIST>/MEG_data/Notepad/ResearchCurrentList.xml</RESEARCHLIST>
+   </PATH>
+</DATAINFO>

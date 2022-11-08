@@ -1,1 +1,53 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><MAXFILTER><SSS><FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE><OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_sss.fif </OUT><CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC><CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL><AUTOBAD>-autobad off </AUTOBAD><LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_sss.log </LOG></SSS><CHPISSS><FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE><OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_cHPIsss.fif </OUT><CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC><CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL><AUTOBAD>-autobad off </AUTOBAD><TRANS>-trans default </TRANS><MOVCOMP>-movecomp </MOVCOMP><HPISTEP>-hpistep 150 </HPISTEP><HPISUBT>-hpisubt amp </HPISUBT><HP>-hp &lt;dir&gt;/sss/&lt;file&gt;.pos </HP><LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_cHPIsss.log </LOG></CHPISSS><TSSS><FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE><OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_tsss.fif </OUT><CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC><CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL><AUTOBAD>-autobad off </AUTOBAD><ST>-st 4 </ST><CORR>-corr 0.9 </CORR><LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_tsss.log </LOG></TSSS><DEFAULTHEADSSS><FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE><OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_defaultHead_sss.fif </OUT><CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC><CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL><AUTOBAD>-autobad off </AUTOBAD><ORIGIN>-origin 0.00 0.00 40.00 </ORIGIN><FRAME>-frame head </FRAME><LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_defaultHead_sss.log </LOG></DEFAULTHEADSSS><NOSSS><FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE><OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_nosss.fif </OUT><CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC><CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL><AUTOBAD>-autobad off </AUTOBAD><NOSSS>-nosss </NOSSS><LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_nosss.log </LOG></NOSSS></MAXFILTER>
+<?xml version="1.0" encoding="utf-8"?>
+<MAXFILTER>
+   <SSS>
+      <FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE>
+      <OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_sss.fif </OUT>
+      <CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC>
+      <CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL>
+      <AUTOBAD>-autobad off </AUTOBAD>
+      <LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_sss.log </LOG>
+   </SSS>
+   <CHPISSS>
+      <FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE>
+      <OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_cHPIsss.fif </OUT>
+      <CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC>
+      <CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL>
+      <AUTOBAD>-autobad off </AUTOBAD>
+      <TRANS>-trans default </TRANS>
+      <MOVCOMP>-movecomp </MOVCOMP>
+      <HPISTEP>-hpistep 150 </HPISTEP>
+      <HPISUBT>-hpisubt amp </HPISUBT>
+      <HP>-hp &lt;dir&gt;/sss/&lt;file&gt;.pos </HP>
+      <LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_cHPIsss.log </LOG>
+   </CHPISSS>
+   <TSSS>
+      <FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE>
+      <OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_tsss.fif </OUT>
+      <CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC>
+      <CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL>
+      <AUTOBAD>-autobad off </AUTOBAD>
+      <ST>-st 4 </ST>
+      <CORR>-corr 0.9 </CORR>
+      <LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_tsss.log </LOG>
+   </TSSS>
+   <DEFAULTHEADSSS>
+      <FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE>
+      <OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_defaultHead_sss.fif </OUT>
+      <CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC>
+      <CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL>
+      <AUTOBAD>-autobad off </AUTOBAD>
+      <ORIGIN>-origin 0.00 0.00 40.00 </ORIGIN>
+      <FRAME>-frame head </FRAME>
+      <LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_defaultHead_sss.log </LOG>
+   </DEFAULTHEADSSS>
+   <NOSSS>
+      <FILE>-f &lt;dir&gt;/&lt;file&gt;.fif </FILE>
+      <OUT>-o &lt;dir&gt;/sss/&lt;file&gt;_nosss.fif </OUT>
+      <CTC>-ctc /neuro/databases/ctc/ct_sparse.fif </CTC>
+      <CAL>-cal /neuro/databases/sss/sss_cal.dat </CAL>
+      <AUTOBAD>-autobad off </AUTOBAD>
+      <NOSSS>-nosss </NOSSS>
+      <LOG>&lt;dir&gt;/sss/logs/maxfilter_&lt;file&gt;_nosss.log </LOG>
+   </NOSSS>
+</MAXFILTER>

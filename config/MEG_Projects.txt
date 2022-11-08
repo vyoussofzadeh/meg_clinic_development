@@ -1,5 +1,7 @@
-mcw
-SampleSets
+project_epil
+megclinic_database
 
-epilepsy
-CAT
+abt_marisa
+MEG
+MEG_Work
+MEG_clinical_consented
