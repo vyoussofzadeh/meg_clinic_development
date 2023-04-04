@@ -1,4 +1,4 @@
-function source_int = vy_source_plot(cfg_main, data)
+function source_int = do_source_plot(cfg_main, data)
 
 cfg = [];
 cfg.parameter = cfg_main.mask;

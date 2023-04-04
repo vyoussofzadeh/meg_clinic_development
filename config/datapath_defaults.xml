@@ -2,9 +2,9 @@
 <DATAINFO>
    <PATH>
       <PROJECTLIST>MEG_Projects.txt</PROJECTLIST>
-      <ROOTPATH>/data/MEG/Clinical</ROOTPATH>
+      <ROOTPATH>/opt/matlab_toolboxes/meg_clinic_development</ROOTPATH>
       <MRIPATH>/data/MEG/Clinical/MRI</MRIPATH>
-      <BSTPATH>/data/MEG/Clinical/brainstorm_db</BSTPATH>
+      <BSTPATH>/data/MEG/Clinical/MEG_clinical_consented</BSTPATH>
       <DEFAULTCONFIGPATH>//opt/matlab_toolboxes/megclinic_development/config</DEFAULTCONFIGPATH>
       <SUBJECTCONFIGPATH>/config</SUBJECTCONFIGPATH>
       <WFFILE>workflow_definition.xml</WFFILE>
