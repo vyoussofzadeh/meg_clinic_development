@@ -6,7 +6,7 @@ function spikedetect(varargin)
 % INPUT:
 %
 % Author: Vahab Youssof Zadeh, 20202
-% Update: 06/07/23
+% Update: 11/09/22
 
 % --------------------------- Script History ------------------------------
 % VY 11-Nov-2022 Creation
@@ -80,7 +80,7 @@ stimSource = char(wf.getName(GUI.WorkflowConfig.STIMSOURCE));
 
 %% Check FieldTrip
 if ~exist('ft_freqanalysis', 'file')
-    %     ft_path ='/opt/matlab_toolboxes/ft_packages/latest/fieldtrip-master';
+%     ft_path ='/opt/matlab_toolboxes/ft_packages/latest/fieldtrip-master';
     ft_path ='/opt/matlab_toolboxes/ft_packages/Stable_version/fieldtrip-master';
     addpath(ft_path); ft_defaults
 end
@@ -147,7 +147,6 @@ trm_data = ft_redefinetrial(cfg,rsm_data); %trimming data
 cfg = [];
 cfg.channel = modal;
 cln_data = ft_selectdata(cfg,trm_data);
-cln_data_full = rsm_data;
 
 %%
 if length(cln_data.label) > 50
@@ -225,9 +224,8 @@ while flag.analysis == 'y'
     
     disp('1) single-chan/sensor time domain (method1 - vy)')
     disp('2) single-chan/sensor time domain (method2 - MR)')
-    disp('3) freq-based')
-    ask.mtd = input('');
-    %     askmtd = 4;
+    askmtd = input('');
+%     askmtd = 4;
     switch ask.freq_occur_sel
         case 1
             spktpye = 'TFR_wideband'; ttl = [savemodal, ' wideband'];
@@ -238,8 +236,8 @@ while flag.analysis == 'y'
         case 4
             spktpye = 'TFR_sel_band'; ttl = [savemodal, ' selected-rate'];
     end
-    
-    switch ask.mtd
+
+    switch askmtd            
         case 1
             
             cfg          = [];
@@ -457,66 +455,7 @@ while flag.analysis == 'y'
                     end
                 end
             end
-            disp(time_occur')
-        case 3
-            cfg = [];
-            cfg.output     = 'pow';
-            cfg.channel    = 'all';
-            cfg.method     = 'mtmconvol';
-            cfg.method     = 'wavelet';
-            %         cfg.taper      = 'hanning';
-            if foi(2) - foi(1) < 10
-                cfg.foi        = foi(1):1:foi(2);
-            else
-                cfg.foi        = foi(1):2:foi(2);
-            end
-            cfg.keeptrials = 'yes';
-            cfg.t_ftimwin  = 3 ./ cfg.foi;
-            cfg.tapsmofrq  = 0.8 * cfg.foi;
-            cfg.toi        = cln_data.time{1}(1):0.05:cln_data.time{1}(end);
-            tfr_data        = ft_freqanalysis(cfg, cln_data);
-            
-            cfg = []; cfg.savepath = 1; cfg.savefile = [];
-            %     cfg.fmax = foi(2);
-            cfg.toi = [tfr_data.time(1), tfr_data.time(end)];
-            cfg.bslcorr = 2; cfg.plotflag = 2; cfg.title = modal;
-            [~,~, tfr_val]    = do_tfr_plot(cfg, tfr_data);
-            
-            askplot =1;
-            cfg = []; cfg.plot = askplot; cfg.art = aft; cfg.ttl = ttl;  cfg.foi = foi;
-            cfg.fsample = cln_data.fsample;
-            [time_occur, ~] = do_spikedetection_tfr(cfg, tfr_val);
-            disp(time_occur')
-            
-            report = [];
-            report.time_occur_num = 1:length(time_occur);
-            %             report.srt_time_occur_num = report.time_occur_num(idx);
-            report.time_occur = time_occur;
-            %             report.srt_time_occur = srt_time_occur;
-            %             report.pow_occur = pow_occur;
-            %             report.srt_pow_occur = srt_pow_occur;
-            
-            tbl_time_occur_num = table(report.time_occur_num');
-            tbl_time_occur_num.Properties.VariableNames{'Var1'} = 'number';
-            
-            tbl_srt_time_occur_num = table(report.time_occur_num');
-            tbl_srt_time_occur_num.Properties.VariableNames{'Var1'} = 'sorted_number';
-            
-            tbl_time_occur = table(report.time_occur');
-            tbl_time_occur.Properties.VariableNames{'Var1'} = 'time_occur';
-            
-            tbl_srt_time_occur = table(report.time_occur');
-            tbl_srt_time_occur.Properties.VariableNames{'Var1'} = 'sorted_time_occur';
-            
-            tbl_pow_occur = table(report.time_occur');
-            tbl_pow_occur.Properties.VariableNames{'Var1'} = 'value_occur';
-            
-            tbl_srt_pow_occur = table(report.time_occur');
-            tbl_srt_pow_occur.Properties.VariableNames{'Var1'} = 'sorted_value_occur';
-            
-            rbl_report = [tbl_time_occur_num, tbl_time_occur, tbl_pow_occur, ...
-                tbl_srt_time_occur_num, tbl_srt_time_occur, tbl_srt_pow_occur];
-            
+            disp(time_occur')            
     end
     
     %%
@@ -611,100 +550,6 @@ while flag.analysis == 'y'
         disp('no spike was detected!');
     end
     
-    %%
-    if ask.modsel == 1
-        disp('MEG source analysis (yes:y, no:n):');
-        ask.soanalysis = input('','s');
-        switch ask.soanalysis
-            case 'y'
-                cfg          = [];
-                cfg.hpfilter = 'yes';
-                cfg.lpfilter = 'yes';
-                cfg.hpfiltord = 3;
-                cfg.hpfreq = foi(1);
-                cfg.lpfreq = foi(2);
-                f_data_sel = ft_preprocessing(cfg, cln_data_full);
-                %                 f_data_sel = cln_data_full;
-                
-                cfg = [];
-                cfg.channel = 'meg';
-                f_data_sel1 = ft_selectdata(cfg, f_data_sel);
-                
-                n_spk = 20;
-                cfg = [];
-                cfg.rbl_report  = rbl_report;
-                cfg.n_spk = n_spk;
-                cfg.kk = 0.5;
-                [D_spk_apnd, cov_D_spk] = do_spkdata(cfg, f_data_sel1); % combine spike data
-                
-                disp(filename)
-                cfg = [];
-                cfg.iChannelsData = 1:length(cov_D_spk.label);
-                [ftLeadfield, ftHeadmodel, ~, ~, ~, sourcemodel] = do_anat(cfg);
-                
-                cfg = [];
-                cfg.ftLeadfield = ftLeadfield;
-                cfg.headmodel   = ftHeadmodel;
-                cfg.n_spk = 10; %n_spk;
-                [D_source, D_source_all] = do_lcmv_source_segments(cfg, D_spk_apnd);
-                D_source.kurtosis = mean(D_source_all,1)';
-                D_source.kurtosis = rms(D_source_all);
-                
-                mask = 'kurtosis';
-                
-                cfg = []; cfg.mask = mask;
-                D_source = do_normalize(cfg, D_source);
-                
-                cfg = []; cfg.mask = mask;
-                cfg.sourcemodel = sourcemodel;
-                cfg.D_source = D_source;
-                do_surface_source_plot(cfg), title(cfg.mask);
-                
-                cfg = [];
-                cfg.ftLeadfield = ftLeadfield;
-                cfg.headmodel = ftHeadmodel;
-                cfg.Connres = size(ftLeadfield.pos,1);
-                cfg.foi = [4,7];
-                do_source_conn_wPLI(cfg, D_spk_apnd)
-                
-                cfg = [];
-                cfg.saveflag = 2;
-                cfg.foilim = [2 100];
-                cfg.plotflag  = 1;
-                cfg.tapsmofrq = 8;
-                cfg.taper     = 'hanning';
-                do_fft(cfg, D_spk_apnd); title('psd raw')
-                
-                
-                cfg = [];
-                cfg.ftLeadfield = ftLeadfield;
-                cfg.headmodel = ftHeadmodel;
-                D_source = do_lcmv_source(cfg, cov_D_spk);
-                
-                cfg = []; cfg.mask = 'kurtosis';
-                D_source = do_normalize(cfg, D_source);
-                
-                cfg = []; cfg.mask = mask;
-                cfg.sourcemodel = sourcemodel;
-                cfg.D_source = D_source;
-                do_surface_source_plot(cfg), title(cfg.mask)
-                
-                cfg = [];
-                cfg.ftLeadfield = ftLeadfield;
-                cfg.headmodel = ftHeadmodel;
-                cfg.Connres = size(ftLeadfield.pos,1);
-                evt = do_source_conn(cfg, cov_D_spk);
-                
-                D_source.evt = evt;
-                cfg = []; cfg.mask = 'evt';
-                cfg.sourcemodel = sourcemodel;
-                cfg.D_source = D_source;
-                do_surface_source_plot(cfg), title(cfg.mask);
-                
-        end
-    end
-    
-    %%
     disp('===')
     disp('Continue the data analysis (yes:y, no:n):');
     ask.dataanalysis = input('','s');
@@ -740,6 +585,4 @@ while flag.analysis == 'y'
         disp('===')
         return,
     end
-    
-    %%
 end

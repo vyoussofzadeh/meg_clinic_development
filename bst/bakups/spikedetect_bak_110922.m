@@ -6,10 +6,9 @@ function spikedetect(varargin)
 % INPUT:
 %
 % Author: Vahab Youssof Zadeh, 20202
-% Update: 06/07/23
-
+% Update: 07/27/22
 % --------------------------- Script History ------------------------------
-% VY 11-Nov-2022 Creation
+% EB 20-JULY-2022 Creation
 % -------------------------------------------------------------------------
 
 flag.analysis = 'y';
@@ -78,11 +77,12 @@ end
 mask = char(wf.getName(GUI.WorkflowConfig.MASK));
 stimSource = char(wf.getName(GUI.WorkflowConfig.STIMSOURCE));
 
-%% Check FieldTrip
+%% Apply Time-freq analysis
 if ~exist('ft_freqanalysis', 'file')
-    %     ft_path ='/opt/matlab_toolboxes/ft_packages/latest/fieldtrip-master';
-    ft_path ='/opt/matlab_toolboxes/ft_packages/Stable_version/fieldtrip-master';
+%     ft_path = '/usr/local/MATLAB_Tools/fieldtrip_20190419';
+    ft_path ='/opt/matlab_toolboxes/ft_packages/latest/fieldtrip-master';
     addpath(ft_path); ft_defaults
+%     addpath('/usr/local/MATLAB_Tools/fieldtrip_20190419/external/mne')
 end
 
 %%
@@ -121,7 +121,7 @@ switch ask.modsel
         cfg.channel = {'meg','eog'};
         
         raw_data = ft_preprocessing(cfg);
-        modal = 'meg*'; savemodal = 'meg';
+        modal = 'meg*';
         cutoff_val = 10;
     case 2
         
@@ -131,13 +131,14 @@ switch ask.modsel
         cfg = []; cfg.dataset = filename; cfg.channel = {'eeg', 'eog'};
         cfg.reref = 'yes'; cfg.refmethod = 'avg'; cfg.refchannel = 'all';
         raw_data = ft_preprocessing(cfg);
-        modal = 'eeg*'; savemodal = 'eeg';
+        modal = 'eeg*';
         cutoff_val = 5;
 end
 
 cfg = [];
 cfg.resamplefs = 500;
 rsm_data = ft_resampledata(cfg, raw_data);
+% rsm_data = raw_data;
 
 %%
 cfg = []; cfg.toilim = [rsm_data.time{:}(1*rsm_data.fsample),rsm_data.time{:}(end-1*rsm_data.fsample)];
@@ -147,7 +148,6 @@ trm_data = ft_redefinetrial(cfg,rsm_data); %trimming data
 cfg = [];
 cfg.channel = modal;
 cln_data = ft_selectdata(cfg,trm_data);
-cln_data_full = rsm_data;
 
 %%
 if length(cln_data.label) > 50
@@ -223,24 +223,116 @@ end
 %% TFR analysis
 while flag.analysis == 'y'
     
-    disp('1) single-chan/sensor time domain (method1 - vy)')
-    disp('2) single-chan/sensor time domain (method2 - MR)')
-    disp('3) freq-based')
-    ask.mtd = input('');
-    %     askmtd = 4;
+    disp('1) freq-based')
+    disp('2) channel-based') 
+    disp('3) single-chan_TFR')
+    disp('4) single-chan_time')
+    disp('5) all-chan_time')
+    disp('6) single-chan_time (MR method)')
+    askmtd = input('');
+%     askmtd = 4;
     switch ask.freq_occur_sel
         case 1
-            spktpye = 'TFR_wideband'; ttl = [savemodal, ' wideband'];
+            spktpye = 'TFR_wideband'; ttl = [modal, ' wideband'];
         case 2
-            spktpye = 'TFR_sr'; ttl = [savemodal, ' slow-rate'];
+            spktpye = 'TFR_sr'; ttl = [modal, ' slow-rate'];
         case 3
-            spktpye = 'TFR_hr'; ttl = [savemodal, ' high-rate'];
+            spktpye = 'TFR_hr'; ttl = [modal, ' high-rate'];
         case 4
-            spktpye = 'TFR_sel_band'; ttl = [savemodal, ' selected-rate'];
+            spktpye = 'TFR_sel_band'; ttl = [modal, ' selected-rate'];
     end
     
-    switch ask.mtd
+    switch askmtd
+        case {1,2,3}
+            cfg = [];
+            cfg.output     = 'pow';
+            cfg.channel    = 'all';
+            cfg.method     = 'mtmconvol';
+            cfg.method     = 'wavelet';
+            %         cfg.taper      = 'hanning';
+            if foi(2) - foi(1) < 10
+                cfg.foi        = foi(1):1:foi(2);
+            else
+                cfg.foi        = foi(1):2:foi(2);
+            end
+            cfg.keeptrials = 'yes';
+            cfg.t_ftimwin  = 3 ./ cfg.foi;
+            cfg.tapsmofrq  = 0.8 * cfg.foi;
+            cfg.toi        = cln_data.time{1}(1):0.05:cln_data.time{1}(end);
+            tfr_data        = ft_freqanalysis(cfg, cln_data);
+            
+            cfg = []; cfg.savepath = 1; cfg.savefile = [];
+            %     cfg.fmax = foi(2);
+            cfg.toi = [tfr_data.time(1), tfr_data.time(end)];
+            cfg.bslcorr = 2; cfg.plotflag = 2; cfg.title = modal;
+            [~,~, tfr_val]    = do_tfr_plot(cfg, tfr_data);
+    end
+    switch askmtd
         case 1
+            askplot =1;
+            cfg = []; cfg.plot = askplot; cfg.art = aft; cfg.ttl = ttl;  cfg.foi = foi;
+            cfg.fsample = cln_data.fsample;
+            [time_occur, ~] = do_spikedetection_tfr(cfg, tfr_val);
+            
+        case 2
+            cfg = []; cfg.savepath = 1; cfg.savefile = [];
+            cfg.fmax = foi(2);
+            cfg.toi = [tfr_data.time(1), tfr_data.time(end)];
+            cfg.bslcorr = 2; cfg.plotflag = 2; cfg.title = modal;
+            [~,~, tfr_val_channel]    = do_tfr_plot_channel(cfg, tfr_data);
+            
+            %%
+            askplot =1;
+            cfg = []; cfg.plot = askplot; cfg.art = aft;  cfg.foi = foi;
+            cfg.foi = [4,40];  cfg.ttl = [modal, ' wideband'];
+            cfg.fsample = cln_data.fsample;
+            [time_occur, ~] = do_spikedetection_tfr_chans(cfg, tfr_val_channel);
+            
+        case 3
+            
+            cfg = []; cfg.savepath = 1; cfg.savefile = [];
+            cfg.fmax = foi(2);
+            cfg.toi = [tfr_data.time(1), tfr_data.time(end)];
+            cfg.bslcorr = 2; cfg.plotflag = 0; cfg.title = modal;
+            [~,~, tfr_val_channel]    = do_tfr_plot_channel(cfg, tfr_data);
+            
+            %%
+            atime_occur_chn = [];
+            cfg = []; cfg.plot = 2; cfg.art = aft; aval_chn = [];
+            for i=1:size(tfr_val_channel.pow,1)
+                
+                data_chn = tfr_val_channel;
+                data_chn.pow = data_chn.pow(i,:);
+                
+                cfg.ttl = [modal, ' wideband'];
+                cfg.fsample = cln_data.fsample;
+                cfg.thre = 0.3;
+                [time_occur_chn, out_val] = do_spikedetection_tfr_schans(cfg, data_chn);
+                atime_occur_chn = [atime_occur_chn, time_occur_chn];
+                aval_chn = [aval_chn, out_val'];
+            end
+            disp(sort(unique(round(atime_occur_chn,2)))')
+            time_occur = sort(unique(round(atime_occur_chn,2)))';
+            
+            [~,I] = sort(atime_occur_chn); pow_occur = aval_chn(I);
+            
+            k = 1;
+            time_occur_sel = [];
+            %             out_val_sel = [];
+            for i=1:length(time_occur)
+                idx = find(abs(time_occur - time_occur(i)) < 4);
+                if length(idx) > 1
+                    disp(idx)
+                    [~, imax] = max(pow_occur(idx));
+                    time_occur_sel(k) = time_occur(idx(imax));
+                else
+                    time_occur_sel(k) = time_occur(i);
+                end
+                k = k + 1;
+            end
+            time_occur =unique(time_occur_sel)';
+            
+        case 4
             
             cfg          = [];
             cfg.hpfilter = 'yes';
@@ -252,7 +344,7 @@ while flag.analysis == 'y'
             
             atime_occur_chn = []; aval_chn = [];
             cfg = []; cfg.plot = 2; cfg.art = aft;
-            cfg.ttl = [savemodal, ' wideband'];
+            cfg.ttl = [modal, ' wideband'];
             cfg.fsample = f_data.fsample;
             cfg.thre = 0.3;
             cfg.overlap = 1-0.5; % 1-0.6 means 40% overlap
@@ -260,12 +352,12 @@ while flag.analysis == 'y'
             cfg.tempcorr = 0.6; % pca template corr
             cfg.metric = 'rms'; % 'var', 'mean' 'std', 'rms', 'skewness', 'ttest'
             
-            disp(['1) Windowlength (sec):',num2str(cfg.windowlength)])
-            disp(['2) Ampl threshold (0-1):',num2str(cfg.thre)])
-            disp(['3) Window overlap (0-1):', num2str(cfg.overlap)])
-            disp(['4) Metrics:',num2str(cfg.metric)])
-            disp(['5) Plotting (flag):',num2str(cfg.plot)])
-            disp('Settings are OK, Yes=y, No:no (change it): '); ask.setchage  = input('','s');
+            disp(['1) windowlength:',num2str(cfg.windowlength)])
+            disp(['2) thre:',num2str(cfg.thre)])
+            disp(['3) overlap:', num2str(cfg.overlap)])
+            disp(['4) metric:',num2str(cfg.metric)])
+            disp(['5) plot flag:',num2str(cfg.plot)])
+            disp('settings are OK, yes=y, no:no (change it): '); ask.setchage  = input('','s');
             
             if  ask.setchage == 'n'
                 disp('specify par to modify, 1:5: '); ask.spcpar  = input('');
@@ -383,12 +475,31 @@ while flag.analysis == 'y'
                 disp('first 20 are also shown!')
             end
             
-        case 2
+        case 5
+            cfg          = [];
+            cfg.hpfilter = 'yes';
+            cfg.lpfilter = 'yes';
+            cfg.hpfiltord = 3;
+            cfg.hpfreq = foi(1);
+            cfg.lpfreq = foi(2);
+            f_data = ft_preprocessing(cfg, cln_data);
+            
+            cfg = []; cfg.plot = 1; cfg.art = aft;
+            cfg.ttl = [modal, ' wideband'];
+            cfg.fsample = f_data.fsample;
+            cfg.thre = 0.3;
+            cfg.overlap = 1-0.6; % 1-0.6 means 60% overlap
+            cfg.windowlength = 0.3;
+            cfg.tempcorr = 0.6; % pca template corr
+            cfg.metric = 'var'; % 'var', 'mean' 'std', 'rms', 'skewness', 'ttest'
+            time_occur = do_spikedetection_time_achans(cfg, f_data);
+            
+        case 6
             
             data_in=cln_data.trial{1};% electrodesXtimesamples
             %Scale amplitudes to microvolts and femtotesla
             
-            switch savemodal
+            switch modal
                 case 'eeg'
                     data_in=data_in*10^7;% raw data in units of 0.1 microvolts?
                 case 'meg'
@@ -398,7 +509,7 @@ while flag.analysis == 'y'
             
             % Choose parameters of the detection
             cfg = [];
-            cfg.dtype = savemodal;
+            cfg.dtype = modal;
             cfg.fs = cln_data.fsample;
             cfg.spikeband = [5 50];
             cfg.statswin = 2;%seconds over which local amlitude stats are estimated
@@ -406,121 +517,34 @@ while flag.analysis == 'y'
             cfg.minterval = 0.2;% Seconds to skip ahead after any spike detection
             cfg.revspikes = 0;% if 1 visually review each detected spike
             
-            disp(['1) spikeband:',num2str(cfg.spikeband)])
-            disp(['2) statswin:',num2str(cfg.statswin)])
-            disp(['3) zthresh:', num2str(cfg.zthresh)])
-            disp(['4) minterval:',num2str(cfg.minterval)])
-            disp(['5) revspikes:',num2str(cfg.revspikes)])
-            disp('Settings are OK, Yes=y, No:no (change it): '); ask.setchage  = input('','s');
-            
-            if  ask.setchage == 'n'
-                disp('specify par to modify, 1:5: '); ask.spcpar  = input('');
-                for i = ask.spcpar
-                    switch i
-                        case 1
-                            disp(['set spikeband (default was, ', num2str(cfg.spikeband),')']); cfg.spikeband = input('');
-                        case 2
-                            disp(['set statswin (default was, ', num2str(cfg.statswin),')']); cfg.statswin  = input('');
-                        case 3
-                            disp(['set zthresh (default was, ', num2str(cfg.zthresh),')']); cfg.zthresh  = input('');
-                        case 4
-                            disp(['set minterval (default was, ', num2str(cfg.minterval),')']); cfg.minterval  = input('');
-                        case 5
-                            disp(['set revspikes (default was, ', num2str(cfg.revspikes),')']); cfg.revspikes  = input('');
-                    end
-                end
-            end
-            
             %Detect spikes
             tic;
             [chspikes,allspikes] = detMEGspikes(data_in,chlabels,cfg);
             
             time_occur = unique(cln_data.time{1}(allspikes));
-            k=1;
-            if cfg.revspikes ==1
-                figure,
-                %plot detections
-                [M,N] = size(chspikes.stimes);
-                for ch = 1:M
-                    chstimes = (nonzeros(chspikes.stimes(ch,:)))';
-                    nchspikes = length(chstimes);
-                    for sp = 1:nchspikes
-                        spiket = chstimes(sp);
-                        plot(data_in(ch,spiket-500:spiket+500));
-                        title([string(chlabels(ch)){1}, ', t:', num2str(time_occur(k))]);
-                        xlim([0 1000]);
-                        k = k+1;
-                        %                     xline(500);
-                        %                     plot([time_occur(j) time_occur(j)],[min(d_in(:)), max(d_in(:))],'-', 'Color',[0.7 0.7 0.7]);
-                        %ylim([-500 500]);
-                        input('Hit return to proceed...');
-                    end
-                end
-            end
-            disp(time_occur')
-        case 3
-            cfg = [];
-            cfg.output     = 'pow';
-            cfg.channel    = 'all';
-            cfg.method     = 'mtmconvol';
-            cfg.method     = 'wavelet';
-            %         cfg.taper      = 'hanning';
-            if foi(2) - foi(1) < 10
-                cfg.foi        = foi(1):1:foi(2);
-            else
-                cfg.foi        = foi(1):2:foi(2);
-            end
-            cfg.keeptrials = 'yes';
-            cfg.t_ftimwin  = 3 ./ cfg.foi;
-            cfg.tapsmofrq  = 0.8 * cfg.foi;
-            cfg.toi        = cln_data.time{1}(1):0.05:cln_data.time{1}(end);
-            tfr_data        = ft_freqanalysis(cfg, cln_data);
             
-            cfg = []; cfg.savepath = 1; cfg.savefile = [];
-            %     cfg.fmax = foi(2);
-            cfg.toi = [tfr_data.time(1), tfr_data.time(end)];
-            cfg.bslcorr = 2; cfg.plotflag = 2; cfg.title = modal;
-            [~,~, tfr_val]    = do_tfr_plot(cfg, tfr_data);
             
-            askplot =1;
-            cfg = []; cfg.plot = askplot; cfg.art = aft; cfg.ttl = ttl;  cfg.foi = foi;
-            cfg.fsample = cln_data.fsample;
-            [time_occur, ~] = do_spikedetection_tfr(cfg, tfr_val);
-            disp(time_occur')
-            
-            report = [];
-            report.time_occur_num = 1:length(time_occur);
-            %             report.srt_time_occur_num = report.time_occur_num(idx);
-            report.time_occur = time_occur;
-            %             report.srt_time_occur = srt_time_occur;
-            %             report.pow_occur = pow_occur;
-            %             report.srt_pow_occur = srt_pow_occur;
-            
-            tbl_time_occur_num = table(report.time_occur_num');
-            tbl_time_occur_num.Properties.VariableNames{'Var1'} = 'number';
-            
-            tbl_srt_time_occur_num = table(report.time_occur_num');
-            tbl_srt_time_occur_num.Properties.VariableNames{'Var1'} = 'sorted_number';
-            
-            tbl_time_occur = table(report.time_occur');
-            tbl_time_occur.Properties.VariableNames{'Var1'} = 'time_occur';
-            
-            tbl_srt_time_occur = table(report.time_occur');
-            tbl_srt_time_occur.Properties.VariableNames{'Var1'} = 'sorted_time_occur';
-            
-            tbl_pow_occur = table(report.time_occur');
-            tbl_pow_occur.Properties.VariableNames{'Var1'} = 'value_occur';
-            
-            tbl_srt_pow_occur = table(report.time_occur');
-            tbl_srt_pow_occur.Properties.VariableNames{'Var1'} = 'sorted_value_occur';
-            
-            rbl_report = [tbl_time_occur_num, tbl_time_occur, tbl_pow_occur, ...
-                tbl_srt_time_occur_num, tbl_srt_time_occur, tbl_srt_pow_occur];
-            
+            %             figure,
+            %             %plot detections
+            %             [M,N] = size(chspikes.stimes);
+            %             for ch = 1:M
+            %                 chstimes = (nonzeros(chspikes.stimes(ch,:)))';
+            %                 nchspikes = length(chstimes);
+            %                 for sp = 1:nchspikes
+            %                     spiket = chstimes(sp);
+            %                     plot(data_in(ch,spiket-500:spiket+500));
+            %                     title(string(chlabels(ch)));
+            %                     xlim([0 1000]);
+            %                     %                     xline(500);
+            % %                     plot([time_occur(j) time_occur(j)],[min(d_in(:)), max(d_in(:))],'-', 'Color',[0.7 0.7 0.7]);
+            %                     %ylim([-500 500]);
+            %                     input('Hit return to proceed...');
+            %                 end
+            %             end
     end
     
     %%
-    Datalog.spktpye = [savemodal, spktpye];
+    Datalog.spktpye = [modal, spktpye];
     %     disp('  Time-points (sec) | value(%)')
     %     disp('   ---------  ------')
     %     disp(time_occur)
@@ -563,7 +587,7 @@ while flag.analysis == 'y'
                 set(gcf,'name',num2str(ask.sel_timeseries(i)),'numbertitle','off')
             end
         end
-        Datalog.spktpye = [savemodal, spktpye];
+        Datalog.spktpye = [modal, spktpye];
         disp('  Time-points (sec) | value(%)')
         disp('   ---------  ------')
         %     disp([time_occur, 100.*val_occur])
@@ -611,100 +635,6 @@ while flag.analysis == 'y'
         disp('no spike was detected!');
     end
     
-    %%
-    if ask.modsel == 1
-        disp('MEG source analysis (yes:y, no:n):');
-        ask.soanalysis = input('','s');
-        switch ask.soanalysis
-            case 'y'
-                cfg          = [];
-                cfg.hpfilter = 'yes';
-                cfg.lpfilter = 'yes';
-                cfg.hpfiltord = 3;
-                cfg.hpfreq = foi(1);
-                cfg.lpfreq = foi(2);
-                f_data_sel = ft_preprocessing(cfg, cln_data_full);
-                %                 f_data_sel = cln_data_full;
-                
-                cfg = [];
-                cfg.channel = 'meg';
-                f_data_sel1 = ft_selectdata(cfg, f_data_sel);
-                
-                n_spk = 20;
-                cfg = [];
-                cfg.rbl_report  = rbl_report;
-                cfg.n_spk = n_spk;
-                cfg.kk = 0.5;
-                [D_spk_apnd, cov_D_spk] = do_spkdata(cfg, f_data_sel1); % combine spike data
-                
-                disp(filename)
-                cfg = [];
-                cfg.iChannelsData = 1:length(cov_D_spk.label);
-                [ftLeadfield, ftHeadmodel, ~, ~, ~, sourcemodel] = do_anat(cfg);
-                
-                cfg = [];
-                cfg.ftLeadfield = ftLeadfield;
-                cfg.headmodel   = ftHeadmodel;
-                cfg.n_spk = 10; %n_spk;
-                [D_source, D_source_all] = do_lcmv_source_segments(cfg, D_spk_apnd);
-                D_source.kurtosis = mean(D_source_all,1)';
-                D_source.kurtosis = rms(D_source_all);
-                
-                mask = 'kurtosis';
-                
-                cfg = []; cfg.mask = mask;
-                D_source = do_normalize(cfg, D_source);
-                
-                cfg = []; cfg.mask = mask;
-                cfg.sourcemodel = sourcemodel;
-                cfg.D_source = D_source;
-                do_surface_source_plot(cfg), title(cfg.mask);
-                
-                cfg = [];
-                cfg.ftLeadfield = ftLeadfield;
-                cfg.headmodel = ftHeadmodel;
-                cfg.Connres = size(ftLeadfield.pos,1);
-                cfg.foi = [4,7];
-                do_source_conn_wPLI(cfg, D_spk_apnd)
-                
-                cfg = [];
-                cfg.saveflag = 2;
-                cfg.foilim = [2 100];
-                cfg.plotflag  = 1;
-                cfg.tapsmofrq = 8;
-                cfg.taper     = 'hanning';
-                do_fft(cfg, D_spk_apnd); title('psd raw')
-                
-                
-                cfg = [];
-                cfg.ftLeadfield = ftLeadfield;
-                cfg.headmodel = ftHeadmodel;
-                D_source = do_lcmv_source(cfg, cov_D_spk);
-                
-                cfg = []; cfg.mask = 'kurtosis';
-                D_source = do_normalize(cfg, D_source);
-                
-                cfg = []; cfg.mask = mask;
-                cfg.sourcemodel = sourcemodel;
-                cfg.D_source = D_source;
-                do_surface_source_plot(cfg), title(cfg.mask)
-                
-                cfg = [];
-                cfg.ftLeadfield = ftLeadfield;
-                cfg.headmodel = ftHeadmodel;
-                cfg.Connres = size(ftLeadfield.pos,1);
-                evt = do_source_conn(cfg, cov_D_spk);
-                
-                D_source.evt = evt;
-                cfg = []; cfg.mask = 'evt';
-                cfg.sourcemodel = sourcemodel;
-                cfg.D_source = D_source;
-                do_surface_source_plot(cfg), title(cfg.mask);
-                
-        end
-    end
-    
-    %%
     disp('===')
     disp('Continue the data analysis (yes:y, no:n):');
     ask.dataanalysis = input('','s');
@@ -740,6 +670,4 @@ while flag.analysis == 'y'
         disp('===')
         return,
     end
-    
-    %%
 end
