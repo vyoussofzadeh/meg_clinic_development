@@ -226,6 +226,7 @@ while flag.analysis == 'y'
     disp('1) single-chan/sensor time domain (method1 - vy)')
     disp('2) single-chan/sensor time domain (method2 - MR)')
     disp('3) freq-based')
+    disp('4) Deep learning')
     ask.mtd = input('');
     %     askmtd = 4;
     switch ask.freq_occur_sel
@@ -517,6 +518,9 @@ while flag.analysis == 'y'
             rbl_report = [tbl_time_occur_num, tbl_time_occur, tbl_pow_occur, ...
                 tbl_srt_time_occur_num, tbl_srt_time_occur, tbl_srt_pow_occur];
             
+        case 4
+
+           disp('test') 
     end
     
     %%
@@ -689,17 +693,17 @@ while flag.analysis == 'y'
                 cfg.D_source = D_source;
                 do_surface_source_plot(cfg), title(cfg.mask)
                 
-                cfg = [];
-                cfg.ftLeadfield = ftLeadfield;
-                cfg.headmodel = ftHeadmodel;
-                cfg.Connres = size(ftLeadfield.pos,1);
-                evt = do_source_conn(cfg, cov_D_spk);
-                
-                D_source.evt = evt;
-                cfg = []; cfg.mask = 'evt';
-                cfg.sourcemodel = sourcemodel;
-                cfg.D_source = D_source;
-                do_surface_source_plot(cfg), title(cfg.mask);
+%                 cfg = [];
+%                 cfg.ftLeadfield = ftLeadfield;
+%                 cfg.headmodel = ftHeadmodel;
+%                 cfg.Connres = size(ftLeadfield.pos,1);
+%                 evt = do_source_conn(cfg, cov_D_spk);
+%                 
+%                 D_source.evt = evt;
+%                 cfg = []; cfg.mask = 'evt';
+%                 cfg.sourcemodel = sourcemodel;
+%                 cfg.D_source = D_source;
+%                 do_surface_source_plot(cfg), title(cfg.mask);
                 
         end
     end

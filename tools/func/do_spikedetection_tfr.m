@@ -37,9 +37,11 @@ ts_pp = (abs(hilbert(abs(data_in(minidx1:minidx2,:)))));
 % ts_pp = (abs((val.pow(minidx1:minidx2,:))));
 % ts_pp = ts_pp./max(ts_pp(:));
 % ts_pp = zscore(ts_pp);
-d_in = nanmean(ts_pp,1);
-d_in = smooth(d_in)';
-d_in = zscore(d_in);
+% d_in = nanmean(ts_pp,1);
+% d_in = smooth(d_in)';
+% d_in = zscore(d_in);
+
+d_in = rms(data_in(minidx1:minidx2,:));
 
 % figure, plot(d_in)
 

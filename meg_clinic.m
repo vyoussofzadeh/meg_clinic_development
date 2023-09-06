@@ -139,6 +139,12 @@ elseif sum(strcmp(varargin,'setup')) > 0
     Defaults.SetupConfiguration();
 
 end
+
+%     % VYZ, 04/04/23
+dynamic_jcp = javaclasspath('-dynamic');
+for i=1:length(dynamic_jcp)
+    javarmpath(dynamic_jcp{i})
+end
 end
 
 %% Assign Callbacks
