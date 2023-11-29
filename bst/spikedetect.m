@@ -151,11 +151,16 @@ cln_data_full = rsm_data;
 
 %%
 if length(cln_data.label) > 50
+    disp('spatial res?');
+    disp('1:All sensors (slow)')
+    disp('2: one-tenth of sensors (fast)')
+    ask.sensres  = input('');
     sel_sens = 1:10:length(cln_data.label);
 else
-    sel_sens = 1:length(cln_data.label);
+    sel_sens = 1:length(cln_data.label);   
 end
 
+%%
 cfg = [];
 cfg.channel = sel_sens;
 cln_data = ft_selectdata(cfg,cln_data);
